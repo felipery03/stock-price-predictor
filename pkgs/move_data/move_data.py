@@ -1,5 +1,6 @@
 import pandas as pd
 from sqlalchemy import create_engine
+import pickle
 from yahooquery import Ticker
 
 def read_api(tickes_list):
@@ -34,3 +35,10 @@ def save_data(df, database_path, table_name):
     except Exception as e:
         print('Failed to save data in db: '+ str(e))
 
+def save_models(models_path, models):
+    pickle.dump(models, open(models_path, 'wb'))
+
+def load_models(models_path):
+    models = pickle.load(open(models_path, 'rb'))
+    
+    return models
