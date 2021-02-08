@@ -3,10 +3,21 @@ from sqlalchemy import create_engine
 import pickle
 from yahooquery import Ticker
 
-def read_api(tickes_list):
+def read_api(tickers_list):
+    ''' Read daily market data from yahooquery API for a set
+        of stocks. It is API for yahoo finance data.
 
+    params:
+    tickers_list (list): List of Tickers stocks to be read.
+
+    returns:
+    stocks_df (dataframe): Return from API
+    '''
+    
     try:
-        ticker = Ticker(tickes_list)
+        # Create API instance
+        ticker = Ticker(tickers_list)
+        # Get max period
         stocks_df = ticker.history(period="max")
 
     except Exception as e:
@@ -26,7 +37,7 @@ def save_data(df, database_path, table_name):
         and extension
     table_name (string): Table name which data will be inputed
     '''
-    
+    # Create engine
     engine = create_engine('sqlite:///' + database_path)
 
     try:
@@ -36,9 +47,11 @@ def save_data(df, database_path, table_name):
         print('Failed to save data in db: '+ str(e))
 
 def save_models(models_path, models):
+    ' Save models in a pickle file'
     pickle.dump(models, open(models_path, 'wb'))
 
 def load_models(models_path):
+    ' Load models from a pickle file'
     models = pickle.load(open(models_path, 'rb'))
     
     return models
