@@ -3,33 +3,53 @@ from sklearn.preprocessing import StandardScaler
 from sklearn.pipeline import make_pipeline
 from sklearn.metrics import mean_absolute_error
 import pandas as pd
+from copy import deepcopy
 
 from feat_metrics import calculate_n_day_return, calculate_sma, calculate_momentum
 from feat_metrics import calculate_volatility, calculate_ema, calculate_capm, calculate_target
 from move_data import save_models
 
+
 class TrainModel():
+    ''' A class to represent model interations.
+
+    Attributes:
+    stock_df (dataframe): Dataframe with stocks prices for specific tickers
+        and ^BOVA index
+    symbols (list): List of tickers that will be trained
+    start_date (string): First date for train period, format (YYYY-MM-DD)
+    end_date (string): Last date for train period, format (YYYY-MM-DD)
+    models_path (string): Pathfile to save pickle models. 
+    targets_dict (dict): Dictionary with defined target options in keys and
+        how many workdays to look ahead in values.
+    '''
+
     def __init__(self, stocks_df, symbols, start_date, end_date, models_path):
+        ''' Constructs all the necessary attributes for TrainModel object.
+        '''
         self.stocks_df = stocks_df.copy()
         self.symbols = symbols
         self.start_date = pd.to_datetime(start_date)
         self.end_date = pd.to_datetime(end_date)
         self.models_path = models_path
-
         self.targets_dict = {'1_day': 1,
                 '1_week': 5,
-                '2_weeks': 5,
+                '2_weeks': 10,
                 '1_month': 22}  
 
-    def prep_historical_data(self, stocks_df, symbol, start_date, end_date):
+    @staticmethod
+    def prep_historical_data(stocks_df, symbol, start_date, end_date):
+        '''
+
+        '''
         start_date_pad = start_date - pd.DateOffset(days=180)
         end_date_pad = end_date + pd.DateOffset(days=45)
         
         data = stocks_df[stocks_df['symbol'].isin([symbol, '^BVSP'])].copy()
         data = data[['symbol', 'date', 'adjclose']]
         
-        stock = self.get_data(data, symbol, start_date_pad, end_date_pad)
-        ibov = self.get_data(data, '^BVSP', start_date_pad, end_date_pad)
+        stock = TrainModel.get_data(data, symbol, start_date_pad, end_date_pad)
+        ibov = TrainModel.get_data(data, '^BVSP', start_date_pad, end_date_pad)
         
         valid_dates = set(ibov.index).intersection(set(stock.index))
         
@@ -38,8 +58,12 @@ class TrainModel():
         
         return (stock, ibov)
 
-    def get_data(self, df, symbol, start_date, end_date):
-        
+    @staticmethod
+    def get_data(df, symbol, start_date, end_date):
+        '''
+
+
+        '''
         data = df[df.symbol == symbol].copy()
         
         data = data[(data.date >= start_date) & (data.date <= end_date)].copy()
@@ -48,7 +72,13 @@ class TrainModel():
         
         return data
 
-    def prep_modeling_data(self, stock, ibov, targets_dict, start_date, end_date, target_flag):
+    @staticmethod
+    def prep_modeling_data(stock, ibov, targets_dict, start_date, end_date, target_flag):
+        '''
+
+
+
+        '''
         # SMA
         sma_7 = calculate_sma(stock, window=7)
         sma_14 = calculate_sma(stock, window=14)
@@ -120,7 +150,13 @@ class TrainModel():
         
         return modeling_df
 
-    def train_model(self, modeling_df, target_period, test_size_ratio):
+    @staticmethod
+    '''
+
+
+
+    '''
+    def train_test_split(modeling_df, target_period, test_size_ratio):
         test_size = round(modeling_df.shape[0] * test_size_ratio)
         
         X = modeling_df.filter(regex='^(?!target_)')
@@ -132,29 +168,39 @@ class TrainModel():
         
         X_test = X.iloc[-test_size:]
         y_test = y.iloc[-test_size:]
-        
-        rf = RandomForestRegressor(random_state=0, n_estimators=1000)
-        pipeline = make_pipeline(StandardScaler(), rf)
-        
+
+        return (X, y, X_train, X_test, y_train, y_test)
+
+    @staticmethod
+    def train_model(X, y, X_train, X_test, y_train, y_test, pipeline):
+        '''
+
+
+
+        '''
         pipeline.fit(X_train, y_train)
-        
+
         y_pred_train = pipeline.predict(X_train)
         y_pred_test = pipeline.predict(X_test)
         mae_train = mean_absolute_error(y_train, y_pred_train)
         mae_test = mean_absolute_error(y_test, y_pred_test)
         
         # Refit
-        model = pipeline.fit(X, y)
+        pipeline.fit(X, y)
         
         result = {'mae_train': mae_train,
                 'mae_test': mae_test,
-                'model': model}
+                'model': deepcopy(pipeline)}
         
         return result    
 
 
     def create_models(self):
+        '''
 
+
+
+        '''
         models = dict()
 
         for symbol in self.symbols:
@@ -164,27 +210,59 @@ class TrainModel():
             # Prep vars to fit the model
             modeling_df = self.prep_modeling_data(stock, ibov, self.targets_dict, self.start_date, self.end_date, True)
 
+            # Pipeline config
+            rf = RandomForestRegressor(random_state=0, n_estimators=1000)
+            pipeline = make_pipeline(StandardScaler(), rf)
+           
             # Train models
             results = dict()
             for target_period in self.targets_dict.keys():
-                results[target_period] = self.train_model(modeling_df, target_period, 0.25)
+                 # Train test split, test 25% of dataset size
+                X, y, X_train, X_test, y_train, y_test = self.train_test_split(modeling_df, target_period, 0.25)
+
+                results[target_period] = self.train_model(X, y, X_train, X_test, y_train, y_test, pipeline)
 
             models[symbol] = results
         
         # Save models in a pickle file
         save_models(self.models_path, models)
 
-    def prep_predict_data(self, forecast_date, symbol):
-        stock, ibov = self.prep_historical_data(self.stocks_df,
-                symbol,
-                start_date=forecast_date,
-                end_date=forecast_date)
+    # def prep_predict_data(self, forecast_date, symbol):
+    #     stock, ibov = self.prep_historical_data(self.stocks_df,
+    #             symbol,
+    #             start_date=forecast_date,
+    #             end_date=forecast_date)
 
-        modeling_df = self.prep_modeling_data(stock,
-                ibov,
-                self.targets_dict,
-                start_date=forecast_date,
-                end_date=forecast_date,
-                target_flag=False)
+    #     modeling_df = self.prep_modeling_data(stock,
+    #             ibov,
+    #             self.targets_dict,
+    #             start_date=forecast_date,
+    #             end_date=forecast_date,
+    #             target_flag=False)
         
-        return modeling_df
+    #     return modeling_df
+
+    @staticmethod
+    def calculate_results(vars_df, targets_dict, pipelines):
+        '''
+
+
+        '''
+        results = []
+        for target in targets_dict.keys():
+            X, y, X_train, X_test, y_train, y_test = TrainModel.train_test_split(vars_df, target, 0.25)
+            
+            metrics = []
+            metrics.append(target)
+            for pipeline_name, pipeline in pipelines.items():
+                result_aux = TrainModel.train_model(X, y, X_train, X_test, y_train, y_test, pipeline)['mae_test']
+                metrics.append(result_aux)
+            results.append(metrics)
+            
+        # Convert results to a dataframe
+        pipeline_names = list(pipelines.keys())
+        results_df = pd.DataFrame(results, columns=['target'] + pipeline_names).T
+        results_df.columns = results_df.iloc[0]
+        results_df.drop(results_df.index[0], inplace=True)
+        
+        return results_df
