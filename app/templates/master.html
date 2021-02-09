@@ -5,17 +5,16 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
-    <title>Predictor</title>
-    
+    <title>Predict Stock Prices</title>
+
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">
+    <link rel="stylesheet" type="text/css" href="{{url_for('static',filename='style.css')}}">
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
     <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
-    <link rel="stylesheet" type="text/css" href="{{url_for('static',filename='style.css')}}">
+    
 </head>
-
 <body>
-
 <nav class="navbar navbar-inverse navbar-fixed-top">
     <div class="container">
         <div class="navbar-header">
@@ -28,15 +27,14 @@
         </div>
     </div>
 </nav>
-
 <div class="jumbotron" id="jumbo">
     <div class="container" ></div>
         <h1 class="text-center">Stock Price Predictor</h1>
         <p class="text-center">Forecasting brazilian stock prices</p>
     </div>
 </div>
-
 <div class="container">
+    <!-- Choose train params -->
     {% block train %}
     <div class="row">
         <form action="/query" method="get" id="trainModels">
@@ -47,7 +45,6 @@
 
                     {% for symbol in symbols%}
                         <li class="list-group-item">
-                            <!-- Default checked -->
                             <div class="custom-control custom-checkbox">
                             <input type="checkbox" class="custom-control-input" id="check{{loop.index}}" name="check{{loop.index}}">
                             <label class="custom-control-label" for="check{{loop.index}}">{{symbol}}</label>
@@ -57,23 +54,26 @@
                     </ul>
                 </div>
             </div>
-            <div class="col-xs-4">
+            <div class="col-xs-6">
                 <h3 class="text-center">Select train period</h3>
                 <div class="col-xs-6">
                     <div class="form-group row">
-                        <label for="example-date-input" class="col-2 col-form-label">Start</label>
+                        <label for="example-date-input" class="col-2 col-form-label">Start date*</label>
                         <input class="form-control" type="date" value="2020-09-01" id="start-date" name="start-date">
                     </div> 
+                    * Select a workday <br>
+                    ** Select a workday later than start date
                 </div>
                 <div class="col-xs-6">
                     <div class="form-group row">
-                        <label for="example-date-input" class="col-2 col-form-label">End</label>
+                        <label for="example-date-input" class="col-2 col-form-label">End date**</label>
                         <input class="form-control" type="date" value="2020-11-30" id="end-date" name="end-date">
                     </div> 
+                <button type="submit" id="trainButton" class="btn btn-lg btn-success pull-right" onclick="loadingfunc()">
+                        Train model
+                </button>
             </div>
-            <button type="submit" id="trainButton" class="btn btn-lg btn-success pull-right" onclick="loadingfunc()">
-                    Train model
-            </button>
+            <!-- Disable button and train model -->
             <script>
                function loadingfunc(){
                 document.getElementById("trainButton").disabled = true
@@ -86,26 +86,11 @@
     </div>
     {% endblock %}
 </div>        
-        
 <div class="container">
-    {% block content %}
-        <div class="page-header">
-            <h1 class="text-center">Overview of Training Dataset</h1>
-        </div>
+    {% block pred %}
     {% endblock %}
-
-    {% for id in ids %}
-        <div id="{{id}}"></div>
-    {% endfor %}
+    {% block results %}
+    {% endblock %}
 </div>
-
-<script type="text/javascript">
-    const graphs = {{graphJSON | safe}};
-    const ids = {{ids | safe}};
-    for(let i in graphs) {
-        Plotly.plot(ids[i], graphs[i].data, graphs[i].layout);
-    }
-</script>
-
 </body>
 </html>

@@ -1,39 +1,41 @@
-{% extends "master.html" %}
+{% extends "query.html" %}
 {% block title %}Results{% endblock %}
-
 {% block train %}
 {% endblock %}
-{% block content %}
-    <div class="row">
-        <h4 class="text-left">Select message genre:</h4>       
+{% block results %}
         <div class="col-xs-6">
-            <form action="/predict" method="get"> 
-            <div class="well" style="max-height: 300px;overflow: auto;">
-                <div class="form-group row">
-                    <label for="example-date-input" class="col-2 col-form-label">Forecast date:</label>
-                    <input class="form-control" type="date" value="2020-12-31" id="start-date" name="start-date">
-                
-                <label for="example-date-input" class="col-2 col-form-label">Ticker:</label>
-                <select class="form-control form-control-sm" name="genre" style="width:auto;">
-                    {% for symbol in symbols%}
-                        <option value="{{symbol}}">{{symbol}}</option>
-                    {% endfor %}
-                </select>  
-                <label for="example-date-input" class="col-2 col-form-label">Target:</label>
-                <select class="form-control form-control-sm" name="genre" style="width:auto;" >
-                    <option selected value="1_day">1 day</option>
-                    <option value="1_week">1 week</option>
-                    <option value="2_weeks">2 weeks</option>
-                    <option value="1_month">1 month</option>
-                </select>
-                <button type="submit" class="btn btn-lg btn-success pull-right">
-                    Forecast
-                </button>
-                </div> 
-            </div>
-        </div>
-        <div class="col-xs-6">
-            Graficoooooooooooooooooooooooooooooo
+            <!-- Table results -->
+            <table class="table" id=table>
+                <thead>
+                  <tr>
+                    <th scope="col">Pred date</th>
+                    <th scope="col">Curr price (R$)</th>
+                    <th scope="col">Pred price (R$)</th>
+                    <th scope="col">Price var (%)</th>
+                    <th scope="col">Pred error (%)</th>
+                  </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>{{results['pred_date']}}</td>
+                        <td>{{results['current_price']}}</td>
+                        <td>{{results['pred_price']}}</td>
+                        <td>{{results['price_var']}}</td>
+                        <td>{{results['mae_test_pct']}}</td>
+                    </tr>
+                </tbody>
+            </table>
+            <div id="graph"></div> 
         </div>
     </div>
-{% endblock %}
+    <!-- Render plot result -->
+    <script type="text/javascript">
+        const graphs = {{graphJSON | safe}};
+        Plotly.plot("graph", graphs.data, graphs.layout);
+    </script>
+    {% endblock %}
+  
+
+
+
+
