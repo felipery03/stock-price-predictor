@@ -25,7 +25,7 @@ class TrainModel():
         how many workdays to look ahead in values.
     '''
 
-    def __init__(self, stocks_df, symbols, start_date, end_date, models_path):
+    def __init__(self, stocks_df, symbols, start_date, end_date, models_path, targets_dict):
         ''' Constructs all the necessary attributes for TrainModel object.
         '''
         self.stocks_df = stocks_df.copy()
@@ -33,10 +33,7 @@ class TrainModel():
         self.start_date = pd.to_datetime(start_date)
         self.end_date = pd.to_datetime(end_date)
         self.models_path = models_path
-        self.targets_dict = {'1_day': 1,
-                '1_week': 5,
-                '2_weeks': 10,
-                '1_month': 22}  
+        self.targets_dict = targets_dict
 
     @staticmethod
     def prep_historical_data(stocks_df, symbol, start_date, end_date):
