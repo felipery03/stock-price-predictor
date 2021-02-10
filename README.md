@@ -96,7 +96,9 @@ All data are from [Yahoo Finance](https://finance.yahoo.com/) and extracted by [
 
 ## Results <a name="results"></a>
 
-1. Home app:
+1. Web app demonstration
+
+1.1. Home app:
 
 ![Picture 1](docs/imgs/homepage.PNG)
 
@@ -105,7 +107,7 @@ For app homepage is necessary to select tickers and train period to train models
 Obs.: Start date and end date should be days that market is open (workdays). And end date should be later than start date. In both cases, an error will occur
 if these conditions are not met. In future project versions, it will include rules in frontend to avoid it.
 
-2. Example of model's predict:
+1.2. Example of model's predict:
 
 ![Picture 2](docs/imgs/query.PNG)
 
@@ -114,7 +116,7 @@ For this page, it is necessary to choose some parameters:
 - Stock ticker from trained subset stocks
 - Target option
 
-3. Plot results:
+1.3. Plot results:
 
 ![Picture 3](docs/imgs/result.PNG)
 
@@ -129,7 +131,7 @@ A plot is showed to help to visualize the results.
 
 It is possible to run another forecasts changing parameters explaned in section 2.
 
-4. Features used to train the model with different windows:
+2. Features used to train the model with different windows:
 - SMA stock price for last 7, 14, 36, 73 and 146 workdays
 - Momentum stock price for last 36 workdays
 - SMA Momentum for last 7, 36 and 73 workdays (momentum fixed in 36)
@@ -142,7 +144,7 @@ It is possible to run another forecasts changing parameters explaned in section 
 
 For more informations see *Analysis.ipynb*
 
-5. Modeling challeges:
+3. Modeling challeges:
 
 First, to build features for this project it was necessary a lot of market knowlodge. This information was provided by Machine Learning for Trading, Tucker Balch (Georgia Tech and Udacity). 
 
@@ -151,9 +153,8 @@ Second, to create features in a time series problem can be a bit complex due to 
 Finally, patterns in stock market changes a lot. It is hard to predict future in an environment so dynamic. The models results can be access in *Analysis.ipynb*, but they
 are not great. Some models just keep safe to avoid a large absolute error and others copy past patterns. Some models really try to forecast a trend, but they are still making a lot of mistakes. However, this project is relevant to have a start point and test new hypothesis to tackle the problem.
 
-6. Future work:
+4. Future work:
 
-To future work:
 - Test new metrics to fit models instead of MAE, they can start to take more choices
 - Use new features based in Fundamental analysis and apply text mining in social media to try to catch market trends
 - Test new types of models, specific to time series
