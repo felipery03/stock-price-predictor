@@ -155,7 +155,6 @@ are not great. Some models just keep safe to avoid a large absolute error and ot
 
 4. Future work:
 
-To future work:
 - Test new metrics to fit models instead of MAE, they can start to take more choices
 - Use new features based in Fundamental analysis and apply text mining in social media to try to catch market trends
 - Test new types of models, specific to time series
