@@ -135,10 +135,10 @@ It is possible to run another forecasts changing parameters explaned in section 
 - SMA stock price for last 7, 14, 36, 73 and 146 workdays
 - Momentum stock price for last 36 workdays
 - SMA Momentum for last 7, 36 and 73 workdays (momentum fixed in 36)
-- SMA ^BOVA for last 73 workdays
+- SMA ^BVSP for last 73 workdays
 - Volatility stock price for last 73 workdays
-- Volatility ^BOVA for last 73 workdays
-- Beta between stock price and ^BOVA for last 73 workdays
+- Volatility ^BVSP for last 73 workdays
+- Beta between stock price and ^BVSP for last 73 workdays
 - EMA stock price for last 7, 14, 36, 73 and 146 workdays
 - Last stock price
 
