@@ -16,7 +16,7 @@ class TrainModel():
 
     Attributes:
     stock_df (dataframe): Dataframe with stocks prices for specific tickers
-        and ^BOVA index
+        and ^BVSP index
     symbols (list): List of tickers that will be trained
     start_date (string): First date for train period, format (YYYY-MM-DD)
     end_date (string): Last date for train period, format (YYYY-MM-DD)
@@ -25,7 +25,7 @@ class TrainModel():
         how many workdays to look ahead in values.
     '''
 
-    def __init__(self, stocks_df, symbols, start_date, end_date, models_path, targets_dict):
+    def __init__(self, stocks_df, symbols, start_date, end_date, models_path, targets_dict  ):
         ''' Constructs all the necessary attributes for TrainModel object.
         '''
         self.stocks_df = stocks_df.copy()
@@ -377,3 +377,42 @@ class TrainModel():
         results_df.drop(results_df.index[0], inplace=True)
         
         return results_df
+
+    @staticmethod
+    def plot_test_result(target_period, models, symbol, vars_test_df):
+        ''' Load a specif trained model for a specific target period, predict values
+        using vars dataframe and create a plot comparation between true and predict value.
+        
+        params:
+        target_period (string): Target name according targets_dict sintax. 
+            Ex.: '1_day' is the target to predict next day, '1_week' to next week.
+        models (dict): All models fit for all possible targets and a list of symbols.
+        symbol (string): Ticker name to plot the result.
+        vars_test_df (dataframe): Dataframe with all features and targets ready to use in
+            desireble period.
+        returns:
+        ax (plot): Plot comparation between true and predict value 
+        
+        '''
+        # Load specific model
+        model = models[symbol][target_period]['model']
+
+        X = vars_test_df.filter(regex='^(?!target_)')
+        y = vars_test_df['target_' + target_period].copy()
+        
+        # Predict next prices
+        y_pred = model.predict(X)
+        
+        # Merge true and pred value
+        y_pred = pd.DataFrame(zip(y_pred, X.index), columns=['y_pred', 'date'])
+        y_pred.set_index('date', inplace=True)
+        result = pd.concat([y_pred.y_pred, y], axis=1)
+
+        # Create plot result
+        ax = result.y_pred.plot()
+        ax = result['target_' + target_period].plot()
+        ax.set_title(symbol + ' - ' + 'target ' + target_period)
+        ax.set_ylabel("Price (R$)")
+        ax.legend()
+
+        return ax
