@@ -142,7 +142,7 @@ It is possible to run another forecasts changing parameters explaned in section 
 - EMA stock price for last 7, 14, 36, 73 and 146 workdays
 - Last stock price
 
-For more informations see *report_project.ipynb*
+For more informations see *project_report.ipynb*
 
 3. Modeling challeges:
 
