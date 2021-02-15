@@ -14,7 +14,7 @@ All aditional python libraries to run this project's scripts are in *requirement
 1. To install all dependences, run in comand line:<br/>
           `pip install -r requirements.txt`
 
-2. To run *Analysis.ipynb* is necessary to install jupyter notebook, with the following command:<br/>
+2. To run *project_report.ipynb* is necessary to install jupyter notebook, with the following command:<br/>
     `pip install jupyter notebook`
 
 3. Run the following command in the project's root directory to run web app:<br/>
@@ -65,7 +65,7 @@ All data are from [Yahoo Finance](https://finance.yahoo.com/) and extracted by [
 |   |   |-- load_data.py # module containg functions with all pipeline to read data from API and save it in db
 |   |   |-- train_models.py # module containg functions with pipelines to prep datasets, train models and score results
 |   |-- setup.py # package setup
-|-- Analysis.ipynb # analysis and discussions about the problem
+|-- project_report.ipynb # analysis and discussions about the problem
 |-- LICENSE 
 |-- README.md
 |-- requirements.txt # dependencies
@@ -142,7 +142,7 @@ It is possible to run another forecasts changing parameters explaned in section 
 - EMA stock price for last 7, 14, 36, 73 and 146 workdays
 - Last stock price
 
-For more informations see *Analysis.ipynb*
+For more informations see *project_report.ipynb*
 
 3. Modeling challeges:
 
@@ -150,8 +150,7 @@ First, to build features for this project it was necessary a lot of market knowl
 
 Second, to create features in a time series problem can be a bit complex due to past periods window that these features can have access.
 
-Finally, patterns in stock market changes a lot. It is hard to predict future in an environment so dynamic. The models results can be access in *Analysis.ipynb*, but they
-are not great. Some models just keep safe to avoid a large absolute error and others copy past patterns. Some models really try to forecast a trend, but they are still making a lot of mistakes. However, this project is relevant to have a start point and test new hypothesis to tackle the problem.
+Finally, patterns in stock market changes a lot. It is hard to predict future in an environment so dynamic. The models results can be found in *project_report.ipynb*, but they are not great. Some models just keep safe to avoid a large absolute error and others copy past patterns. Some models really try to forecast a trend, but they are still making a lot of mistakes. However, this project is relevant to have a start point and test new hypothesis to tackle the problem.
 
 4. Future work:
 
