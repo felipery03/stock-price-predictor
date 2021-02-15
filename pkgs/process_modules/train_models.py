@@ -240,7 +240,7 @@ class TrainModel():
         return (X, y, X_train, X_test, y_train, y_test)
 
     @staticmethod
-    def train_model(X, y, X_train, X_test, y_train, y_test, pipeline):
+    def train_model(X, y, X_train, X_test, y_train, y_test, pipeline, refit_flag=True):
         ''' Train a specific pipeline using X_train and y_train. Calculate
             MAE for train and test set and refit pipeline with all data.
 
@@ -252,6 +252,7 @@ class TrainModel():
         y_train (series): Train series with specific target
         y_test (series): Test series with specific target
         pipeline (sklearn pipeline estimator): Pipeline to be fitted
+        refit_flag (boolean): If true refit pipeline with entire dataset
 
         returns:
         result (dictionary): Dictionary with MAE from train and test set,
@@ -265,7 +266,8 @@ class TrainModel():
         mae_test = mean_absolute_error(y_test, y_pred_test)
         
         # Refit
-        pipeline.fit(X, y)
+        if refit_flag:
+            pipeline.fit(X, y)
         
         result = {'mae_train': mae_train,
                 'mae_test': mae_test,
@@ -299,10 +301,25 @@ class TrainModel():
                     self.end_date, 
                     target_flag=True)
 
-            # Pipeline config (model choosen in Analysis)
-            rf = RandomForestRegressor(random_state=0, n_estimators=1000)
-            pipeline = make_pipeline(StandardScaler(), rf)
-           
+            # Pipeline config (models choosen in hyperparameter tuning)
+            pipeline_rf = {
+                '1_day': make_pipeline(StandardScaler(),
+                RandomForestRegressor(criterion='mae', max_depth=5,
+                min_samples_leaf=2, n_estimators=500,
+                random_state=0)),
+                '1_week': make_pipeline(StandardScaler(),
+                RandomForestRegressor(criterion='mae', max_depth=4,
+                max_features='sqrt', min_samples_leaf=2,
+                random_state=0)),
+                '2_weeks': make_pipeline(StandardScaler(),
+                RandomForestRegressor(criterion='mae', max_depth=10,
+                n_estimators=1700, random_state=0)),
+                '1_month': make_pipeline(StandardScaler(),
+                RandomForestRegressor(criterion='mae', max_depth=5,
+                min_samples_leaf=2, min_samples_split=10,
+                random_state=0))
+            }
+         
             # Train models
             results = dict()
             # For each target option
@@ -312,7 +329,10 @@ class TrainModel():
                         modeling_df,
                         target_period,
                         test_size_ratio=0.25)
-
+                
+                # Pick specific pipeline for target_period
+                pipeline = pipeline_rf[target_period]
+                
                 results[target_period] = self.train_model(
                         X,
                         y,
@@ -357,6 +377,8 @@ class TrainModel():
             metrics.append(target)
             # For each pipeline
             for _, pipeline in pipelines.items():
+
+                target_pipeline = pipeline[target] 
                 # Fit model and return MAE test
                 result_aux = TrainModel.train_model(
                         X,
@@ -365,7 +387,7 @@ class TrainModel():
                         X_test,
                         y_train,
                         y_test,
-                        pipeline)['mae_test']
+                        target_pipeline)['mae_test']
 
                 metrics.append(result_aux)
             results.append(metrics)
